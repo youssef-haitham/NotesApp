@@ -1,0 +1,5 @@
+[project]
+id = "${RAILWAY_PROJECT}"
+
+[service]
+id = "${RAILWAY_SERVICE}"
