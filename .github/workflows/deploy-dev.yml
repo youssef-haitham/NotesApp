@@ -28,7 +28,7 @@ jobs:
       - name: Run unit tests
         run: dotnet test --no-build --verbosity normal --filter Category!=Integration
 
-      - name: Restore .NET tools
+      - name: Restore local tools (if any)
         run: dotnet tool restore
 
       - name: Apply migrations on DEV database
@@ -48,8 +48,7 @@ jobs:
       - name: Install Railway CLI
         run: curl -fsSL https://railway.app/install.sh | sh
 
-      - name: Railway Login
-        run: railway login --token ${{ secrets.RAILWAY_API_TOKEN }}
-
       - name: Deploy to Railway
         run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
