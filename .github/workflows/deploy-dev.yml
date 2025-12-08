@@ -17,7 +17,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            9.0.x
+            9.0.0-aspnetcore
 
       - name: Restore dependencies
         run: dotnet restore ./Notes.API
@@ -25,11 +27,14 @@ jobs:
       - name: Build project
         run: dotnet build ./Notes.API -c Release --no-restore
 
-      - name: Run unit tests only
+      - name: Run unit tests
         run: dotnet test --no-build --verbosity normal --filter Category!=Integration
 
       - name: Install EF Tools
-        run: dotnet tool install --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.*
+
+      - name: Restore Tools
+        run: dotnet tool restore
 
       - name: Apply migrations on DEV database
         run: dotnet ef database update --project ./Notes.API
