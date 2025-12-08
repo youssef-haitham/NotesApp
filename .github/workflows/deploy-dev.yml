@@ -22,7 +22,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ./Notes.API
 
-      - name: Build
+      - name: Build project
         run: dotnet build ./Notes.API -c Release --no-restore
 
       - name: Run unit tests
@@ -31,7 +31,7 @@ jobs:
       - name: Restore tools
         run: dotnet tool restore || true
 
-      - name: Apply migrations
+      - name: Apply EF migrations
         run: dotnet ef database update --project ./Notes.API --startup-project ./Notes.API
         env:
           POSTGRES_CONNECTION_STRING: ${{ secrets.POSTGRES_CONNECTION_STRING }}
@@ -48,14 +48,9 @@ jobs:
       - name: Install Railway CLI
         run: curl -fsSL https://railway.app/install.sh | sh
 
-      - name: Set Railway Context
-        run: |
-          railway project use ${{ secrets.RAILWAY_PROJECT_ID }}
-          railway service use ${{ secrets.RAILWAY_SERVICE_ID }}
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
-
       - name: Deploy to Railway
         run: railway deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+          RAILWAY_PROJECT: ${{ secrets.RAILWAY_PROJECT_ID }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE_ID }}
