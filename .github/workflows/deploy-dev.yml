@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build_and_test:
+  build_and_unit_test:
     runs-on: ubuntu-latest
     environment: DEV
 
@@ -22,11 +22,14 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ./Notes.API
 
-      - name: Build
+      - name: Build project
         run: dotnet build ./Notes.API -c Release --no-restore
 
       - name: Run unit tests
         run: dotnet test --no-build --verbosity normal --filter Category!=Integration
+
+      - name: Restore tools
+        run: dotnet tool restore || true
 
       - name: Apply EF migrations
         run: dotnet ef database update --project ./Notes.API --startup-project ./Notes.API
