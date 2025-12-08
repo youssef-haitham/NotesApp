@@ -12,22 +12,36 @@ using NotesApp.API.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddEnvironmentVariables();
+
 var services = builder.Services;
 
-services.AddDbContext<NoteDBContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("NotesDbConnectionString")));
+var connectionString =
+    Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("NotesDbConnectionString");
+services.AddDbContext<NoteDBContext>(options => options.UseNpgsql(connectionString));
 
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IUserService, UserService>();
 
 services.AddScoped<IUserRepository, UserRepository>();
 
-services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? builder.Configuration["Jwt:Key"];
+var jwtSection = builder.Configuration.GetSection("Jwt");
+var jwtSettings = jwtSection.Get<JwtSettings>()!;
+jwtSettings.Key = jwtKey!;
+services.Configure<JwtSettings>(options =>
+{
+    options.Issuer = jwtSettings.Issuer;
+    options.Audience = jwtSettings.Audience;
+    options.Key = jwtSettings.Key;
+});
 services.AddScoped<ITokenHelper, TokenHelper>();
 
 services.AddControllers();
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
-    JwtSettings? jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
     options.TokenValidationParameters = new TokenValidationParameters
     {
 

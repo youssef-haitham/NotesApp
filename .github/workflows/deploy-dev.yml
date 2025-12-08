@@ -1,0 +1,50 @@
+name: CI & Deploy to DEV
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_unit_test:
+    runs-on: ubuntu-latest
+    environment: DEV
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ./Notes.API
+
+      - name: Build project
+        run: dotnet build ./Notes.API -c Release --no-restore
+
+      - name: Run unit tests only
+        run: dotnet test --no-build --verbosity normal --filter Category!=Integration
+
+      - name: Install EF Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Apply migrations on DEV database
+        run: dotnet ef database update --project ./Notes.API
+        env:
+          POSTGRES_CONNECTION_STRING: ${{ secrets.POSTGRES_CONNECTION_STRING }}
+
+  deploy:
+    needs: build_and_unit_test
+    runs-on: ubuntu-latest
+    environment: DEV
+
+    steps:
+      - name: Deploy to Railway
+        uses: railwayapp/railway-action@v1
+        with:
+          projectId: ${{ secrets.RAILWAY_PROJECT_ID }}
+          serviceId: ${{ secrets.RAILWAY_SERVICE_ID }}
+          token: ${{ secrets.RAILWAY_API_TOKEN }}

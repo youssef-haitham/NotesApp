@@ -1,0 +1,25 @@
+name: Integration Tests on DEV API
+
+on:
+  workflow_run:
+    workflows: ["CI & Deploy to DEV"]
+    types:
+      - completed
+
+jobs:
+  integration_tests:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: DEV
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Run Integration Tests
+        run: dotnet test --no-build --verbosity normal --filter Category=Integration
