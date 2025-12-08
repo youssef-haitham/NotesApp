@@ -17,9 +17,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: |
-            9.0.x
-            9.0.0-aspnetcore
+          dotnet-version: '9.0.x'
 
       - name: Restore dependencies
         run: dotnet restore ./Notes.API
@@ -30,14 +28,11 @@ jobs:
       - name: Run unit tests
         run: dotnet test --no-build --verbosity normal --filter Category!=Integration
 
-      - name: Install EF Tools
-        run: dotnet tool install --global dotnet-ef --version 9.*
-
-      - name: Restore Tools
+      - name: Restore Local Tools
         run: dotnet tool restore
 
       - name: Apply migrations on DEV database
-        run: dotnet ef database update --project ./Notes.API
+        run: dotnet ef database update --project ./Notes.API --startup-project ./Notes.API
         env:
           POSTGRES_CONNECTION_STRING: ${{ secrets.POSTGRES_CONNECTION_STRING }}
 
