@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.HttpOverrides;
 using NotesApp.API.DBContext;
 using NotesApp.API.Interfaces.Repositories;
 using NotesApp.API.Interfaces.Services;
@@ -16,75 +17,80 @@ builder.Configuration.AddEnvironmentVariables();
 
 var services = builder.Services;
 
+// DB
 var connectionString =
     Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("NotesDbConnectionString");
+
 services.AddDbContext<NoteDBContext>(options => options.UseNpgsql(connectionString));
 
+// DI
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IUserService, UserService>();
-
 services.AddScoped<IUserRepository, UserRepository>();
+services.AddScoped<ITokenHelper, TokenHelper>();
 
+// JWT
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
     ?? builder.Configuration["Jwt:Key"];
+
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtSettings = jwtSection.Get<JwtSettings>()!;
 jwtSettings.Key = jwtKey!;
+
 services.Configure<JwtSettings>(options =>
 {
     options.Issuer = jwtSettings.Issuer;
     options.Audience = jwtSettings.Audience;
     options.Key = jwtSettings.Key;
 });
-services.AddScoped<ITokenHelper, TokenHelper>();
 
-services.AddControllers();
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-                Convert.FromBase64String(jwtSettings.Key)
-            ),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidateAudience = true,
-        ValidAudience = jwtSettings.Audience,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            if (context.Request.Cookies.TryGetValue("auth_token", out var token))
-            {
-                context.Token = token;
-            }
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtSettings.Key)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
 
-            return Task.CompletedTask;
-        }
-    };
-});
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.TryGetValue("auth_token", out var token))
+                {
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins("http://localhost:3000")
-              .AllowAnyMethod()
               .AllowAnyHeader()
+              .AllowAnyMethod()
               .AllowCredentials();
     });
 });
+
+services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Swagger
 if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -94,6 +100,14 @@ if (!app.Environment.IsProduction())
         options.RoutePrefix = "swagger";
     });
 }
+
+// FOR RAILWAY (Reverse Proxy)
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    KnownNetworks = { },
+    KnownProxies = { }
+});
 
 app.UseHttpsRedirection();
 app.UseRouting();
