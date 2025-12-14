@@ -8,8 +8,9 @@ namespace NotesApp.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController(IAuthService authService, IUserService userService) : ControllerBase
+    public class AuthController(ILogger<AuthController> logger ,IAuthService authService, IUserService userService) : ControllerBase
     {
+        private readonly ILogger<AuthController> _logger = logger;
         private readonly IAuthService _authService = authService;
         private readonly IUserService _userService = userService;
 
@@ -18,6 +19,7 @@ namespace NotesApp.API.Controllers
         {
             try
             {
+                _logger.LogInformation("SignUp: Received Signup request for email {}", user.Email);
                 var (authResponse, token) = await _authService.SignUp(user);
 
                 var cookieOptions = new CookieOptions
@@ -30,10 +32,13 @@ namespace NotesApp.API.Controllers
                 };
                 Response.Cookies.Append("auth_token", token, cookieOptions);
 
+                _logger.LogInformation("SignUp: User Signedup successfully for email {}", user.Email);
+
                 return Ok(authResponse);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "SignUp: Failed to signup user {}", user.Email);
                 return Problem(
                     detail: ex.Message,
                     title: "Something went wrong",
@@ -47,6 +52,7 @@ namespace NotesApp.API.Controllers
         {
             try
             {
+                _logger.LogInformation("SignIn: Received Signin request for user {}", user.Email);
                 var (authResponse, token) = await _authService.SignIn(user);
 
                 var cookieOptions = new CookieOptions
@@ -59,10 +65,12 @@ namespace NotesApp.API.Controllers
                 }; ;
                 Response.Cookies.Append("auth_token", token, cookieOptions);
 
+                _logger.LogInformation("SignIn: Signedin successfully for email {}", user.Email);
                 return Ok(authResponse);
             }
             catch(Exception ex)
             {
+                _logger.LogError(ex, "SignIn: Failed to signin user {}", user.Email);
                 return Problem(
                     detail: ex.Message,
                     title: "Something went wrong",
@@ -76,9 +84,14 @@ namespace NotesApp.API.Controllers
         [Route("me")]
         public async Task<IActionResult> Me()
         {
+            _logger.LogInformation("Me: Received Me request");
             string? userId = User.FindFirst("id")?.Value;
+
             if (userId is null)
+            {
+                _logger.LogError("Me: Failed to find ID for Me Request");
                 return Unauthorized();
+            }
 
             UserDto? userDto = await _userService.GetUserById(Guid.Parse(userId));
             if (userDto == null)
@@ -87,6 +100,7 @@ namespace NotesApp.API.Controllers
                 return Unauthorized();
             }
 
+            _logger.LogInformation("Me: User returned successfully");
             return Ok(userDto);
         }
 

@@ -43,6 +43,7 @@ services.Configure<JwtSettings>(options =>
     options.Issuer = jwtSettings.Issuer;
     options.Audience = jwtSettings.Audience;
     options.Key = jwtSettings.Key;
+    options.ExpiresInHours = jwtSettings.ExpiresInHours;
 });
 
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
