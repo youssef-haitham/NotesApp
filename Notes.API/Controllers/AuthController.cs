@@ -24,8 +24,9 @@ namespace NotesApp.API.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Lax,
-                    Expires = DateTime.UtcNow.AddHours(24)
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddHours(24),
+                    Path = "/"
                 };
                 Response.Cookies.Append("auth_token", token, cookieOptions);
 
@@ -52,9 +53,10 @@ namespace NotesApp.API.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Lax,
-                    Expires = DateTime.UtcNow.AddHours(24)
-                };
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddHours(24),
+                    Path = "/"
+                }; ;
                 Response.Cookies.Append("auth_token", token, cookieOptions);
 
                 return Ok(authResponse);
