@@ -20,4 +20,10 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Modules\Notes\Controllers\" />
+    <Folder Include="Modules\Notes\Repositories\" />
+    <Folder Include="Modules\Notes\Services\" />
+  </ItemGroup>
+
 </Project>

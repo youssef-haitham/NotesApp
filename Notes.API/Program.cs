@@ -2,14 +2,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.HttpOverrides;
-using NotesApp.API.DBContext;
 using NotesApp.API.Interfaces.Repositories;
 using NotesApp.API.Interfaces.Services;
 using NotesApp.API.Interfaces.Utility;
-using NotesApp.API.Repositories;
-using NotesApp.API.Services;
-using NotesApp.API.Settings;
-using NotesApp.API.Utility;
+using NotesApp.API.Modules.Auth.Repositories;
+using NotesApp.API.Modules.Auth.Services;
+using NotesApp.API.Modules.Auth.Settings;
+using NotesApp.API.Modules.Auth.Utility;
+using NotesApp.API.Infrastructure.DBContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,8 @@ services.AddDbContext<NoteDBContext>(options => options.UseNpgsql(connectionStri
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IUserRepository, UserRepository>();
-services.AddScoped<ITokenHelper, TokenHelper>();
+services.AddScoped<ITokenProvider, TokenProvider>();
+services.AddScoped<IHashProvider, HashProvider>();
 
 // JWT
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
