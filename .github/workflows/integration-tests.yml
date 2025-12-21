@@ -2,7 +2,7 @@ name: Integration Tests on DEV API
 
 on:
   workflow_run:
-    workflows: ["CI & Deploy to DEV"]
+    workflows: ["CI on DEV"]
     types:
       - completed
 

@@ -7,9 +7,16 @@ using NotesApp.API.Interfaces.Services;
 using NotesApp.API.Interfaces.Utility;
 using NotesApp.API.Modules.Auth.Repositories;
 using NotesApp.API.Modules.Auth.Services;
+using NotesApp.API.Modules.Auth.Interfaces.Repositories;
 using NotesApp.API.Modules.Auth.Settings;
 using NotesApp.API.Modules.Auth.Utility;
 using NotesApp.API.Infrastructure.DBContext;
+using NotesApp.API.Common.Middleware;
+using NotesApp.API.Modules.Notes.Interfaces.Repositories;
+using NotesApp.API.Modules.Notes.Interfaces.Services;
+using NotesApp.API.Modules.Notes.Repositories;
+using NotesApp.API.Modules.Notes.Services;
+using NotesApp.API.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,21 +24,22 @@ builder.Configuration.AddEnvironmentVariables();
 
 var services = builder.Services;
 
-// DB
 var connectionString =
     Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     ?? builder.Configuration.GetConnectionString("NotesDbConnectionString");
 
 services.AddDbContext<NoteDBContext>(options => options.UseNpgsql(connectionString));
 
-// DI
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IUserRepository, UserRepository>();
+services.AddScoped<IRoleRepository, RoleRepository>();
 services.AddScoped<ITokenProvider, TokenProvider>();
 services.AddScoped<IHashProvider, HashProvider>();
 
-// JWT
+services.AddScoped<INoteService, NoteService>();
+services.AddScoped<INoteRepository, NoteRepository>();
+
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
     ?? builder.Configuration["Jwt:Key"];
 
@@ -86,13 +94,18 @@ services.AddCors(options =>
     });
 });
 
+services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOrAdmin", policy => policy.RequireRole("User", "Admin"));
+});
+
 services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Swagger
 if (!app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -103,7 +116,6 @@ if (!app.Environment.IsProduction())
     });
 }
 
-// FOR RAILWAY (Reverse Proxy)
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
@@ -111,6 +123,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     KnownProxies = { }
 });
 
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseCors("AllowFrontend");
@@ -118,5 +131,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var userRepo = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+    var roleRepo = scope.ServiceProvider.GetRequiredService<IRoleRepository>();
+    var hashProvider = scope.ServiceProvider.GetRequiredService<IHashProvider>();
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    await DataSeeder.SeedRolesAsync(roleRepo);
+    await DataSeeder.SeedAdminUserAsync(userRepo, roleRepo, hashProvider, configuration);
+}
 
 app.Run();

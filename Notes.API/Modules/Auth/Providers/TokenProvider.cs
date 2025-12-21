@@ -11,14 +11,15 @@ namespace NotesApp.API.Modules.Auth.Utility
     {
         private readonly JwtSettings settings = options.Value;
 
-        public string CreateToken(Guid id, string email)
+        public string CreateToken(Guid id, string email, string role)
         {
             byte[] keyBytes = Convert.FromBase64String(settings.Key);
             SymmetricSecurityKey securityKey = new(keyBytes);
             List<Claim> claims =
             [
                 new("id", id.ToString()),
-                new("email", email)
+                new("email", email),
+                new(ClaimTypes.Role, role)
             ];
             SigningCredentials cred = new(securityKey, SecurityAlgorithms.HmacSha256);
             JwtSecurityToken token = new(issuer: settings.Issuer,

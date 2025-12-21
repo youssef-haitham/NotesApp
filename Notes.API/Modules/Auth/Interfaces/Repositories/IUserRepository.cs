@@ -8,9 +8,10 @@ namespace NotesApp.API.Interfaces.Repositories
         Task<User?> UpdateUserAsync(User user);
         Task<User?> GetUserByIdAsync(Guid userId);
         Task<User?> GetUserByEmailAsync(string email);
-        Task<IEnumerable<User>> GetUsersAsync(int pageNumber, int pageSize);
+        Task<(IEnumerable<User> users, int totalCount)> GetUsersAsync(int pageNumber, int pageSize);
         Task<bool> DeleteUserByIdAsync(Guid userId);
         Task<bool> UserExistsAsync(Guid userId);
         Task<bool> UserExistsByEmailAsync(string email);
+        Task<UserRole> AddUserRoleAsync(UserRole userRole);
     }
 }

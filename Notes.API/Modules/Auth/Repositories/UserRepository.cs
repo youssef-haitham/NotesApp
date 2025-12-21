@@ -24,22 +24,43 @@ namespace NotesApp.API.Modules.Auth.Repositories
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _noteDBContext.User.FirstOrDefaultAsync(u => u.Email.Equals(email));
+            return await _noteDBContext.User
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Email.Equals(email));
         }
 
         public async Task<User?> GetUserByIdAsync(Guid userId)
         {
-            return await _noteDBContext.User.FirstOrDefaultAsync(u => u.Id == userId);
+            return await _noteDBContext.User
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public Task<IEnumerable<User>> GetUsersAsync(int pageNumber, int pageSize)
+        public async Task<(IEnumerable<User> users, int totalCount)> GetUsersAsync(int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
+            var query = _noteDBContext.User
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (users, totalCount);
         }
 
-        public Task<User?> UpdateUserAsync(User user)
+        public async Task<User?> UpdateUserAsync(User user)
         {
-            throw new NotImplementedException();
+            _noteDBContext.User.Update(user);
+            await _noteDBContext.SaveChangesAsync();
+            return user;
         }
 
         public Task<bool> UserExistsAsync(Guid userId)
@@ -50,6 +71,13 @@ namespace NotesApp.API.Modules.Auth.Repositories
         public async Task<bool> UserExistsByEmailAsync(string email)
         {
             return await _noteDBContext.User.AnyAsync(u => u.Email.Equals(email));
+        }
+
+        public async Task<UserRole> AddUserRoleAsync(UserRole userRole)
+        {
+            var addedUserRole = await _noteDBContext.UserRole.AddAsync(userRole);
+            await _noteDBContext.SaveChangesAsync();
+            return addedUserRole.Entity;
         }
     }
 }

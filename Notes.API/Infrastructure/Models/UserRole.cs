@@ -1,36 +1,29 @@
-﻿using NotesApp.API.Modules.Notes.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NotesApp.API.Infrastructure.Models
 {
-    public class Note
+    public class UserRole
     {
         [Required]
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public required string Title { get; set; }
-
-        public string Content { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
 
         [Required]
-        public Colors BackgroundColor { get; set; } = Colors.YELLOW;
-
-        public bool IsDeleted { get; set; }
+        public int RoleId { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Required]
-        [DataType(DataType.DateTime)]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        public Guid UserId { get; set; }
-
         [ForeignKey("UserId")]
         public User? User { get; set; }
+
+        [ForeignKey("RoleId")]
+        public Role? Role { get; set; }
     }
 }
+

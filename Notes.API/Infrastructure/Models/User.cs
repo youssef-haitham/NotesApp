@@ -29,5 +29,6 @@ namespace NotesApp.API.Infrastructure.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public List<Note>? Notes { get; set; }
+        public List<UserRole> UserRoles { get; set; } = [];
     }
 }
