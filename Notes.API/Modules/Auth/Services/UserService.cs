@@ -13,7 +13,7 @@ namespace NotesApp.API.Modules.Auth.Services
         public async Task<UserDto> GetUserById(Guid id)
         {
             User? user = await _userRepo.GetUserByIdAsync(id);
-            
+
             if (user == null)
             {
                 throw new NotFoundException("User", id);

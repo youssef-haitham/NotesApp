@@ -188,6 +188,13 @@ Notes.API/
         ├── Interfaces/
         ├── Repositories/
         └── Services/
+
+NotesApp.API.Tests/
+├── Common/                # Tests for Common components
+├── Infrastructure/        # Tests for Infrastructure components
+└── Modules/
+    ├── Auth/              # Tests for Auth module
+    └── Notes/             # Tests for Notes module
 ```
 
 ---
@@ -205,6 +212,31 @@ docker run -p 8080:8080 \
 ---
 
 ## 🧪 Testing
+
+### Unit Tests
+
+The project includes comprehensive unit tests using **NUnit** and **Moq**.
+
+**Run all tests:**
+```bash
+dotnet test NotesApp.API.Tests
+```
+
+**Run tests with coverage:**
+```bash
+dotnet test NotesApp.API.Tests --collect:"XPlat Code Coverage"
+```
+
+**Run specific test class:**
+```bash
+dotnet test NotesApp.API.Tests --filter "FullyQualifiedName~AuthServiceTests"
+```
+
+**Test Coverage:**
+- ✅ Common (Exceptions, DTOs)
+- ✅ Infrastructure (Data Seeding, Helpers)
+- ✅ Auth Module (Services, Providers, Controllers, Repositories)
+- ✅ Notes Module (Services, Controllers, Repositories)
 
 ### Using Swagger
 1. Open `https://localhost:7277/swagger`
