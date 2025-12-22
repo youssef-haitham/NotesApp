@@ -1,13 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY Notes.sln .
-COPY Notes.API/*.csproj Notes.API/
+COPY Notes.API/NotesApp.API.csproj Notes.API/
 
-RUN dotnet restore
+RUN dotnet restore Notes.API/NotesApp.API.csproj
 
-COPY . .
-RUN dotnet publish Notes.API -c Release -o /app/publish
+COPY Notes.API/ Notes.API/
+RUN dotnet publish Notes.API/NotesApp.API.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
