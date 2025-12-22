@@ -2,6 +2,7 @@ using Moq;
 using NotesApp.API.Common.Exceptions;
 using NotesApp.API.Infrastructure.Models;
 using NotesApp.API.Interfaces.Repositories;
+using NotesApp.API.Interfaces.Utility;
 using NotesApp.API.Modules.Auth.Services;
 
 namespace NotesApp.API.Tests.Modules.Auth.Services;
@@ -10,13 +11,15 @@ namespace NotesApp.API.Tests.Modules.Auth.Services;
 public class UserServiceTests
 {
     private Mock<IUserRepository> _userRepositoryMock = null!;
+    private Mock<IHashProvider> _hashProviderMock = null!;
     private UserService _userService = null!;
 
     [SetUp]
     public void Setup()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
-        _userService = new UserService(_userRepositoryMock.Object);
+        _hashProviderMock = new Mock<IHashProvider>();
+        _userService = new UserService(_userRepositoryMock.Object, _hashProviderMock.Object);
     }
 
     [Test]
@@ -46,7 +49,7 @@ public class UserServiceTests
     }
 
     [Test]
-    public async Task GetUserById_WhenUserDoesNotExist_ShouldThrowNotFoundException()
+    public void GetUserById_WhenUserDoesNotExist_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -96,7 +99,7 @@ public class UserServiceTests
     }
 
     [Test]
-    public async Task GetUsersAsync_WithInvalidPageNumber_ShouldThrowBadRequestException()
+    public void GetUsersAsync_WithInvalidPageNumber_ShouldThrowBadRequestException()
     {
         // Act & Assert
         var ex = Assert.ThrowsAsync<BadRequestException>(async () => await _userService.GetUsersAsync(0, 10));
@@ -104,7 +107,7 @@ public class UserServiceTests
     }
 
     [Test]
-    public async Task GetUsersAsync_WithInvalidPageSize_ShouldThrowBadRequestException()
+    public void GetUsersAsync_WithInvalidPageSize_ShouldThrowBadRequestException()
     {
         // Act & Assert
         var ex1 = Assert.ThrowsAsync<BadRequestException>(async () => await _userService.GetUsersAsync(1, 0));
@@ -114,4 +117,3 @@ public class UserServiceTests
         Assert.That(ex2?.Message, Is.EqualTo("Page size must be between 1 and 100"));
     }
 }
-

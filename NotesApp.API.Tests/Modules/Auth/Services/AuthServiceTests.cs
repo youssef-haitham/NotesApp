@@ -91,7 +91,7 @@ public class AuthServiceTests
     }
 
     [Test]
-    public async Task SignUp_WhenUserExists_ShouldThrowConflictException()
+    public void SignUp_WhenUserExists_ShouldThrowConflictException()
     {
         // Arrange
         var signUpRequest = new SignUpRequestDto
@@ -111,7 +111,7 @@ public class AuthServiceTests
     }
 
     [Test]
-    public async Task SignUp_WhenUserRoleNotFound_ShouldThrowException()
+    public void SignUp_WhenUserRoleNotFound_ShouldThrowException()
     {
         // Arrange
         var signUpRequest = new SignUpRequestDto
@@ -171,7 +171,7 @@ public class AuthServiceTests
     }
 
     [Test]
-    public async Task SignIn_WhenUserDoesNotExist_ShouldThrowBadRequestException()
+    public void SignIn_WhenUserDoesNotExist_ShouldThrowBadRequestException()
     {
         // Arrange
         var signInRequest = new SignInRequestDto
@@ -189,7 +189,7 @@ public class AuthServiceTests
     }
 
     [Test]
-    public async Task SignIn_WhenPasswordIsInvalid_ShouldThrowBadRequestException()
+    public void SignIn_WhenPasswordIsInvalid_ShouldThrowBadRequestException()
     {
         // Arrange
         var signInRequest = new SignInRequestDto

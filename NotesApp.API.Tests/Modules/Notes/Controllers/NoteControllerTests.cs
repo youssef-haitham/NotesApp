@@ -144,7 +144,7 @@ public class NoteControllerTests
     }
 
     [Test]
-    public async Task GetNoteById_WhenNoteNotFound_ShouldThrowNotFoundException()
+    public void GetNoteById_WhenNoteNotFound_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();

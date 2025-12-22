@@ -70,7 +70,7 @@ public class AuthControllerTests
     }
 
     [Test]
-    public async Task SignUp_WhenUserExists_ShouldThrowConflictException()
+    public void SignUp_WhenUserExists_ShouldThrowConflictException()
     {
         // Arrange
         var signUpRequest = new SignUpRequestDto
@@ -119,7 +119,7 @@ public class AuthControllerTests
     }
 
     [Test]
-    public async Task SignIn_WhenCredentialsInvalid_ShouldThrowBadRequestException()
+    public void SignIn_WhenCredentialsInvalid_ShouldThrowBadRequestException()
     {
         // Arrange
         var signInRequest = new SignInRequestDto

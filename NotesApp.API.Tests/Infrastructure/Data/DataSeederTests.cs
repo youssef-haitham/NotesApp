@@ -125,7 +125,7 @@ public class DataSeederTests
     }
 
     [Test]
-    public async Task SeedAdminUserAsync_WhenAdminRoleNotFound_ShouldThrowException()
+    public void SeedAdminUserAsync_WhenAdminRoleNotFound_ShouldThrowException()
     {
         // Arrange
         _configurationMock.Setup(x => x["Admin:Email"]).Returns("admin@notesapp.com");

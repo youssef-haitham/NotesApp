@@ -125,7 +125,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task GetNoteByIdAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
+    public void GetNoteByIdAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -141,7 +141,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task GetNoteByIdAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
+    public void GetNoteByIdAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -215,7 +215,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task UpdateNoteAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
+    public void UpdateNoteAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -236,7 +236,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task UpdateNoteAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
+    public void UpdateNoteAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -290,7 +290,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task DeleteNoteAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
+    public void DeleteNoteAsync_WhenNoteDoesNotExist_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -306,7 +306,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task DeleteNoteAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
+    public void DeleteNoteAsync_WhenNoteBelongsToDifferentUser_ShouldThrowForbiddenException()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -329,7 +329,7 @@ public class NoteServiceTests
     }
 
     [Test]
-    public async Task DeleteNoteAsync_WhenDeleteFails_ShouldThrowNotFoundException()
+    public void DeleteNoteAsync_WhenDeleteFails_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = Guid.NewGuid();
