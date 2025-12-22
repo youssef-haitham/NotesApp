@@ -3,13 +3,16 @@ using NotesApp.API.Common.Exceptions;
 using NotesApp.API.Infrastructure.Models;
 using NotesApp.API.Interfaces.Repositories;
 using NotesApp.API.Interfaces.Services;
+using NotesApp.API.Interfaces.Utility;
+using NotesApp.API.Modules.Auth.Dtos.Request;
 using NotesApp.API.Modules.Auth.Dtos.Response;
 
 namespace NotesApp.API.Modules.Auth.Services
 {
-    public class UserService(IUserRepository userRepo) : IUserService
+    public class UserService(IUserRepository userRepo, IHashProvider hashProvider) : IUserService
     {
         private readonly IUserRepository _userRepo = userRepo;
+        private readonly IHashProvider _hashProvider = hashProvider;
         public async Task<UserDto> GetUserById(Guid id)
         {
             User? user = await _userRepo.GetUserByIdAsync(id);
@@ -50,6 +53,31 @@ namespace NotesApp.API.Modules.Auth.Services
                 PageSize = pageSize,
                 TotalCount = totalCount
             };
+        }
+
+        public async Task UpdatePasswordAsync(Guid userId, UpdatePasswordRequestDto request)
+        {
+            var user = await _userRepo.GetUserByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User", userId);
+            }
+
+            if (!_hashProvider.Verify(request.CurrentPassword, user.PasswordHash))
+            {
+                throw new BadRequestException("Current password is incorrect");
+            }
+
+            if (request.CurrentPassword == request.NewPassword)
+            {
+                throw new BadRequestException("New password must be different from current password");
+            }
+
+            user.PasswordHash = _hashProvider.HashPassword(request.NewPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _userRepo.UpdateUserAsync(user);
         }
     }
 }

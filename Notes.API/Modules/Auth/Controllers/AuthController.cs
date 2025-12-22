@@ -84,6 +84,26 @@ namespace NotesApp.API.Modules.Auth.Controllers
             return Ok(new { message = "Logged out successfully" });
         }
 
+        [Authorize]
+        [HttpPut("password")]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequestDto request)
+        {
+            _logger.LogInformation("UpdatePassword: Received password update request");
+            string? userId = User.FindFirst("id")?.Value;
+
+            if (userId is null)
+            {
+                _logger.LogWarning("UpdatePassword: Failed to find ID - token may be invalid");
+                Response.Cookies.Delete("auth_token");
+                return Unauthorized();
+            }
+
+            await _userService.UpdatePasswordAsync(Guid.Parse(userId), request);
+
+            _logger.LogInformation("UpdatePassword: Password updated successfully for user {UserId}", userId);
+            return Ok(new { message = "Password updated successfully" });
+        }
+
         [Authorize(Policy = "AdminOnly")]
         [HttpGet("admin/users")]
         public async Task<IActionResult> GetAllUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)

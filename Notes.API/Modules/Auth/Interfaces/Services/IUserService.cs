@@ -1,4 +1,5 @@
 ﻿using NotesApp.API.Common.Dtos;
+using NotesApp.API.Modules.Auth.Dtos.Request;
 using NotesApp.API.Modules.Auth.Dtos.Response;
 
 namespace NotesApp.API.Interfaces.Services
@@ -7,5 +8,6 @@ namespace NotesApp.API.Interfaces.Services
     {
         Task<UserDto> GetUserById(Guid id);
         Task<PagedResponseDto<UserDto>> GetUsersAsync(int pageNumber, int pageSize);
+        Task UpdatePasswordAsync(Guid userId, UpdatePasswordRequestDto request);
     }
 }
