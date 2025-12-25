@@ -90,7 +90,7 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:3000",
-                "https://generous-mercy-dev.up.railway.app"
+                "https://simplenotes-dev.up.railway.app"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
