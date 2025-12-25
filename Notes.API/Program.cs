@@ -129,7 +129,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseCors("AllowFrontend");
+app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
