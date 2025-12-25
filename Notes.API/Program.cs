@@ -88,12 +88,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
             .WithOrigins(
                 "http://localhost:3000",
                 "https://generous-mercy-dev.up.railway.app"
-            );
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
